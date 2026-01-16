@@ -134,6 +134,12 @@ button:hover {
     transform: scale(1.1);
 }
 
+/* Focus Letter Highlight */
+.focus-letter {
+    color: red;
+    font-weight: bold;
+}
+
 /* Custom Colors Wrapper */
 #custom-colors {
     margin-top: -10px; /* Bring it closer to palette selector */
@@ -148,6 +154,8 @@ button:hover {
 .buttons {
     display: flex;
     gap: 10px;
+    flex-wrap: wrap; /* Allow wrapping on small screens */
+    justify-content: center;
 }
 
 #start-btn { background-color: #28a745; }
@@ -165,15 +173,24 @@ button:hover {
 /* Responsive adjustments */
 @media (max-width: 600px) {
     :root {
-        --box-width: 90%;
+        --box-width: 95%; /* Wider on mobile */
+        --box-height: 150px; /* Slightly shorter default */
     }
     
     .controls {
         flex-direction: column;
-        align-items: center;
+        align-items: stretch; /* Stretch controls to full width */
+        padding: 10px;
+    }
+
+    .control-group {
+        flex-wrap: wrap;
+        justify-content: center;
     }
     
-    .palindrome-section {
-        align-items: center;
+    .buttons button {
+        flex: 1 1 40%; /* Buttons take up space but allow side-by-side */
+        min-width: 100px;
     }
+
 }

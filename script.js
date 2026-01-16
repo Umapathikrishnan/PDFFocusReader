@@ -24,6 +24,7 @@ const fontSelect = document.getElementById("font-select");
 const startPageInput = document.getElementById("start-page");
 const endPageInput = document.getElementById("end-page");
 const themeToggle = document.getElementById("theme-toggle");
+const focusToggle = document.getElementById("focus-toggle"); // Focus Letter Toggle
 const paletteSwatches = document.querySelectorAll(".palette-swatch");
 const customPaletteBtn = document.getElementById("custom-palette-btn");
 const customColorsDiv = document.getElementById("custom-colors");
@@ -49,6 +50,7 @@ box.textContent = dummyText;
 fileInput.addEventListener("change", (event) => {
   loadedFile = event.target.files[0];
   if (loadedFile && loadedFile.type === "application/pdf") {
+    // Reset page inputs on new file load
     startPageInput.value = "";
     endPageInput.value = ""; 
     readPDF(loadedFile);
@@ -125,11 +127,13 @@ fontSelect.addEventListener("change", (e) => {
 // 5. Color Palettes
 paletteSwatches.forEach((swatch) => {
   swatch.addEventListener("click", () => {
+    // Remove active class from all
     paletteSwatches.forEach((s) => s.classList.remove("active"));
     swatch.classList.add("active");
 
     if (swatch.id === "custom-palette-btn") {
       customColorsDiv.style.display = "flex";
+      // Set box colors to current custom input values
       box.style.color = textColorInput.value;
       box.style.backgroundColor = bgColorInput.value;
     } else {
@@ -138,6 +142,8 @@ paletteSwatches.forEach((swatch) => {
       const text = swatch.dataset.text;
       box.style.backgroundColor = bg;
       box.style.color = text;
+
+      // Update custom inputs to match selection (optional ux)
       textColorInput.value = text;
       bgColorInput.value = bg;
     }
@@ -199,6 +205,23 @@ function updatePageIndicator(pageNum) {
     }
 }
 
+function formatWord(word) {
+    // Check if the feature is enabled
+    if (!focusToggle.checked) return word;
+    
+    // Only format if word is substantial enough? User asked for center letter.
+    // If length is 1, index 0. If 2, index 0 (floor) or 1? Math.floor((2-1)/2) = 0.
+    // Let's use standard center floor.
+    if (word.length === 0) return word;
+
+    const centerIndex = Math.floor((word.length - 1) / 2);
+    const pre = word.substring(0, centerIndex);
+    const center = word[centerIndex];
+    const post = word.substring(centerIndex + 1);
+
+    return `${pre}<span class="focus-letter">${center}</span>${post}`;
+}
+
 function startReadingLoop() {
   if (words.length === 0) return;
 
@@ -215,7 +238,9 @@ function startReadingLoop() {
 
   timer = setInterval(() => {
     if (currentWordIndex < words.length) {
-      box.textContent = words[currentWordIndex];
+      const displayWord = formatWord(words[currentWordIndex]);
+      box.innerHTML = displayWord; // Use InnerHTML for styling
+      
       // Update page number
       const pageNum = wordPageMapping[currentWordIndex];
       if (pageNum) updatePageIndicator(pageNum);
