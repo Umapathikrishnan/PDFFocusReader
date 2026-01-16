@@ -152,8 +152,14 @@ customWpmInput.addEventListener("change", () => {
 });
 
 // 4. Font Selection
+const textSizeSelect = document.getElementById("text-size-select");
+
 fontSelect.addEventListener("change", (e) => {
     box.style.fontFamily = e.target.value;
+});
+
+textSizeSelect.addEventListener("change", (e) => {
+    box.style.fontSize = e.target.value;
 });
 
 // 5. Color Palettes
@@ -192,9 +198,18 @@ bgColorInput.addEventListener("input", (e) => {
 
 // 7. Theme Toggle
 themeToggle.addEventListener("click", () => {
-  document.body.classList.toggle("light-mode");
-  const isLight = document.body.classList.contains("light-mode");
-  themeToggle.textContent = isLight ? "Dark Mode" : "Light Mode";
+  document.documentElement.classList.toggle("dark");
+  const isDark = document.documentElement.classList.contains("dark");
+  themeToggle.textContent = isDark ? "Light Mode" : "Dark Mode";
+  
+  // Update button style
+  if(isDark) {
+      themeToggle.classList.remove("bg-slate-600", "hover:bg-slate-700");
+      themeToggle.classList.add("bg-yellow-500", "hover:bg-yellow-600", "text-black");
+  } else {
+      themeToggle.classList.add("bg-slate-600", "hover:bg-slate-700");
+      themeToggle.classList.remove("bg-yellow-500", "hover:bg-yellow-600", "text-black");
+  }
 });
 
 // --- Helper Functions ---
@@ -219,6 +234,56 @@ function stopReadingInterval() {
   clearInterval(timer);
   isReading = false;
 }
+
+// --- Focus Mode Logic ---
+const focusModeBtn = document.getElementById("focus-mode-btn");
+const exitFocusBtn = document.getElementById("exit-focus-btn");
+const mainHeader = document.querySelector("h1");
+const controlsContainer = document.querySelector(".bg-white\\/10"); // Tailwind class selector needs escaping in JS
+// The original previewContainer is already defined at the top, so we don't redefine it.
+// const previewContainer = document.getElementById("preview-container"); 
+// The original fileInput is already defined at the top, so we don't redefine it.
+// const fileInput = document.getElementById("file-input");
+
+focusModeBtn.addEventListener("click", () => {
+    // Hide Distractions
+    mainHeader.classList.add("hidden");
+    controlsContainer.classList.add("hidden");
+    previewContainer.classList.add("hidden");
+    
+    // Show Exit Button
+    exitFocusBtn.classList.remove("hidden");
+    
+    // Adjust Body for focus (optional, maybe center more)
+    document.body.classList.add("justify-center");
+});
+
+exitFocusBtn.addEventListener("click", () => {
+    // Show Distractions
+    mainHeader.classList.remove("hidden");
+    controlsContainer.classList.remove("hidden");
+    // Only show preview if PDF is loaded, but for now just removing hidden is fine as it has its own logic handling display
+    // Actually, previewContainer starts hidden and is shown by readPDF. 
+    // If we just remove hidden, it might show empty box. 
+    // Better to restore its previous state? Simpler: Just remove "hidden" class that we added. 
+    // Wait, if we added 'hidden', removing it goes back to default.
+    // If we remove 'hidden' and it was already hidden by default logic, it might show up.
+    // Let's rely on the fact that we are toggling *our* applied hiding.
+    // But modifying the classList directly might interfere.
+    // Safer approach: Toggle a "focus-active" class on body and use CSS or just explicit show/hide.
+    
+    // Re-show header and controls
+    mainHeader.classList.remove("hidden");
+    controlsContainer.classList.remove("hidden");
+    
+    // Check if pdfDoc exists to decide on preview
+    if(pdfDoc) {
+        previewContainer.classList.remove("hidden");
+    }
+    
+    // Hide Exit Button
+    exitFocusBtn.classList.add("hidden");
+});
 
 function getWPM() {
   let val = wpmSelect.value;
@@ -251,7 +316,7 @@ function formatWord(word) {
     const center = word[centerIndex];
     const post = word.substring(centerIndex + 1);
 
-    return `${pre}<span class="focus-letter">${center}</span>${post}`;
+    return `${pre}<span class="text-red-500 font-bold">${center}</span>${post}`;
 }
 
 // Function to render PDF page
