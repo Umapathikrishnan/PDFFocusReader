@@ -1,19 +1,179 @@
-#box {
-  width: 200px;
-  height: 100px;
-  background-color: rgb(0, 195, 255);
-  border: 1px solid;
-  border-radius: 5px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  text-align: center;
+/* Global Styles */
+:root {
+  --bg-color: rgb(43, 43, 43);
+  --text-color: white;
+  --box-width: 60%;
+  --box-height: 200px;
 }
+
 body {
   display: flex;
   justify-content: center;
   align-items: center;
   flex-direction: column;
-  color: white;
-  background-color: rgb(43, 43, 43);
+  color: var(--text-color);
+  background-color: var(--bg-color);
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  min-height: 100vh;
+  margin: 0;
+  transition: background-color 0.3s, color 0.3s;
+}
+
+/* Light Mode */
+body.light-mode {
+  --bg-color: #f0f0f0;
+  --text-color: #333;
+}
+
+h1 {
+  margin-bottom: 20px;
+}
+
+/* Controls Container */
+.controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 20px;
+  margin-bottom: 20px;
+  background: rgba(0, 0, 0, 0.2);
+  padding: 15px;
+  border-radius: 8px;
+  justify-content: center;
+}
+
+body.light-mode .controls {
+    background: rgba(0, 0, 0, 0.05);
+}
+
+.control-group {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+/* Inputs & Buttons */
+input[type="file"], select, input[type="number"], button {
+    padding: 8px;
+    border-radius: 5px;
+    border: 1px solid #ccc;
+    font-size: 1rem;
+}
+
+button {
+    cursor: pointer;
+    background-color: #007bff;
+    color: white;
+    border: none;
+    transition: background-color 0.2s;
+}
+
+button:hover {
+    background-color: #0056b3;
+}
+
+#theme-toggle {
+    background-color: #6c757d;
+}
+#theme-toggle:hover {
+    background-color: #5a6268;
+}
+
+/* Reader Box */
+#box {
+  width: var(--box-width);
+  height: var(--box-height);
+  background-color: rgb(0, 195, 255); /* Default, overridden by JS */
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  font-size: 2rem;
+  font-weight: bold;
+  overflow: auto; /* Required for resize in some browsers, but mainly for text overflow */
+  resize: both; /* Make adjustable */
+  padding: 20px;
+  margin-bottom: 20px;
+  color: black; /* Default text color in box */
+  position: relative; /* For absolute positioning context if needed, though indicator is outside */
+}
+
+/* Page Indicator */
+#page-indicator {
+    width: var(--box-width); /* Match box width */
+    text-align: right;
+    margin-bottom: 5px;
+    font-size: 0.9rem;
+    color: var(--text-color);
+    font-weight: bold;
+}
+
+/* Palette Options */
+.palette-section {
+    flex-direction: column;
+    align-items: flex-start;
+}
+.palette-options {
+    display: flex;
+    gap: 10px;
+}
+.palette-swatch {
+    width: 25px;
+    height: 25px;
+    border-radius: 50%; /* Circle swatches */
+    cursor: pointer;
+    border: 2px solid rgba(0,0,0,0.2);
+    transition: transform 0.2s;
+}
+.palette-swatch:hover {
+    transform: scale(1.1);
+}
+.palette-swatch.active {
+    border: 2px solid #007bff;
+    transform: scale(1.1);
+}
+
+/* Custom Colors Wrapper */
+#custom-colors {
+    margin-top: -10px; /* Bring it closer to palette selector */
+    animation: fadeIn 0.3s ease-in-out;
+}
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(-5px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* Start/Stop Buttons */
+.buttons {
+    display: flex;
+    gap: 10px;
+}
+
+#start-btn { background-color: #28a745; }
+#start-btn:hover { background-color: #218838; }
+
+#pause-btn { background-color: #ffc107; color: #212529; }
+#pause-btn:hover { background-color: #e0a800; }
+
+#continue-btn { background-color: #17a2b8; }
+#continue-btn:hover { background-color: #138496; }
+
+#reset-btn { background-color: #dc3545; }
+#reset-btn:hover { background-color: #c82333; }
+
+/* Responsive adjustments */
+@media (max-width: 600px) {
+    :root {
+        --box-width: 90%;
+    }
+    
+    .controls {
+        flex-direction: column;
+        align-items: center;
+    }
+    
+    .palindrome-section {
+        align-items: center;
+    }
 }

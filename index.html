@@ -9,11 +9,88 @@
 
     <!-- Input element to select a local PDF file -->
     <input type="file" id="file-input" accept="application/pdf" />
-    <pre id="output"></pre>
 
+    <!-- Controls Container -->
+    <div class="controls">
+      <!-- WPM selector -->
+      <div class="control-group">
+        <label for="wpm-select">Speed:</label>
+        <select id="wpm-select">
+            <option value="100">Focus (100 wpm)</option>
+            <option value="150">Careful (150 wpm)</option>
+            <option value="200" selected>Custom (200 wpm)</option>
+            <option value="220">Normal (220 wpm)</option>
+            <option value="250">Balanced ⭐ (250 wpm)</option>
+            <option value="300">Fluent (300 wpm)</option>
+            <option value="350">Fast (350 wpm)</option>
+            <option value="450">Rapid (450 wpm)</option>
+            <option value="600">Scan (600 wpm)</option>
+            <option value="800">Hyper ⚠️ (800 wpm)</option>
+            <option value="900">Ultra ⚠️ (900 wpm)</option>
+            <option value="1000">Blitz ⚠️ (1000 wpm)</option>
+            <option value="1500">Warp 🚨 (1500 wpm)</option>
+            <option value="2000">Quantum 🚨 (2000 wpm)</option>
+            <option value="custom">Custom...</option>
+        </select>
+        <input type="number" id="custom-wpm" placeholder="Enter WPM" style="display: none;" />
+      </div>
+
+      <!-- Font Selector -->
+      <div class="control-group">
+        <label for="font-select">Font:</label>
+        <select id="font-select">
+            <option value="Arial, sans-serif" selected>Arial (Sans)</option>
+            <option value="'Times New Roman', Times, serif">Times New Roman (Serif)</option>
+            <option value="'Courier New', Courier, monospace">Courier New (Mono)</option>
+            <option value="Georgia, serif">Georgia (Serif)</option>
+            <option value="Verdana, sans-serif">Verdana (Sans)</option>
+            <option value="'Segoe UI', Tahoma, Geneva, Verdana, sans-serif">Segoe UI (Sans)</option>
+            <option value="Impact, Charcoal, sans-serif">Impact (Display)</option>
+        </select>
+      </div>
+
+      <!-- Page Range Selector -->
+      <div class="control-group">
+        <label>Pages:</label>
+        <input type="number" id="start-page" placeholder="Start" min="1" style="width: 60px;">
+        <span>to</span>
+        <input type="number" id="end-page" placeholder="End" min="1" style="width: 60px;">
+        <button id="update-range-btn" title="Reload PDF with new range">↻</button>
+      </div>
+
+      <!-- Color Palettes -->
+      <div class="control-group palette-section">
+        <label>Theme:</label>
+        <div class="palette-options">
+            <div class="palette-swatch" data-bg="#CEE5D0" data-text="#2c3e50" title="Sage" style="background-color: #CEE5D0;"></div>
+            <div class="palette-swatch" data-bg="#F3F0D7" data-text="#2c3e50" title="Beige" style="background-color: #F3F0D7;"></div>
+            <div class="palette-swatch" data-bg="#F7D59C" data-text="#2c3e50" title="Apricot" style="background-color: #F7D59C;"></div>
+            <div class="palette-swatch" data-bg="#5E454B" data-text="#f0f0f0" title="Eggplant" style="background-color: #5E454B;"></div>
+            <div class="palette-swatch custom-swatch" id="custom-palette-btn" title="Custom" style="background: linear-gradient(45deg, red, blue);"></div>
+        </div>
+      </div>
+
+      <!-- Custom Colors (Hidden by default or shown when Custom selected) -->
+      <div class="control-group" id="custom-colors" style="display: none;">
+        <label for="text-color">Text:</label>
+        <input type="color" id="text-color" value="#000000">
+        <label for="bg-color">Box:</label>
+        <input type="color" id="bg-color" value="#00c3ff">
+      </div>
+
+      <!-- Theme Toggle -->
+      <button id="theme-toggle">Dark Mode</button>
+    </div>
+
+    <!-- Reader Display -->
+    <div id="page-indicator" style="display: none;">Page: <span id="current-page-num">-</span></div>
     <div id="box"></div>
-    <button id="start">Start Reading</button>
-    <button id="stop">Stop Reading</button>
+    <div class="buttons">
+      <button id="start-btn">Start Reading</button>
+      <button id="pause-btn" style="display: none;">Pause</button>
+      <button id="continue-btn" style="display: none;">Continue</button>
+      <button id="reset-btn">Reset</button>
+    </div>
     <script type="module" src="./script.js"></script>
     <script type="module" src="./index.js"></script>
   </body>
