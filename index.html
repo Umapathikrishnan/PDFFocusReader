@@ -97,8 +97,20 @@
       <button id="start-btn">Start Reading</button>
       <button id="pause-btn" style="display: none;">Pause</button>
       <button id="continue-btn" style="display: none;">Continue</button>
-      <button id="reset-btn">Reset</button>
+      <button id="reset-btn" style="display: inline-block;">Reset</button>
     </div>
+
+    <!-- PDF Preview Element -->
+    <div id="preview-container">
+        <label>Page Preview:</label>
+        <canvas id="pdf-render"></canvas>
+        <div class="pdf-controls">
+            <button id="prev-page">Previous</button>
+            <span id="page-count-display">Page <span id="preview-page-num">-</span> of <span id="total-pages">-</span></span>
+            <button id="next-page">Next</button>
+        </div>
+    </div>
+
     <script type="module" src="./script.js"></script>
     <script type="module" src="./index.js"></script>
   </body>

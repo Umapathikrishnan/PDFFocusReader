@@ -31,6 +31,11 @@ const customColorsDiv = document.getElementById("custom-colors");
 const textColorInput = document.getElementById("text-color");
 const bgColorInput = document.getElementById("bg-color");
 
+// PDF Preview Elements
+const previewContainer = document.getElementById("preview-container");
+const canvas = document.getElementById("pdf-render");
+const ctx = canvas.getContext("2d");
+
 // --- State Variables ---
 let outputText = ""; 
 let timer;
@@ -39,6 +44,8 @@ let currentWordIndex = 0;
 let words = [];
 let wordPageMapping = []; // Tracks page number for each word index
 let loadedFile = null; 
+let pdfDoc = null; // Store loaded PDF document globally
+let currentlyRenderedPage = 0; // State to track rendered page
 
 // Initial Setup
 const dummyText = "Results will appear here. Please select a PDF file.";
@@ -84,6 +91,12 @@ resetBtn.addEventListener("click", () => {
     resetReaderState();
     box.textContent = words.length > 0 ? "Reset. Ready to start." : dummyText;
     currentWordIndex = 0;
+    
+    // Reset preview to start page if available
+    if (wordPageMapping.length > 0) {
+        renderPage(wordPageMapping[0]);
+    }
+
     updatePageIndicator("-");
     updateButtonVisibility("stopped");
 });
@@ -94,6 +107,25 @@ updateRangeBtn.addEventListener("click", () => {
     } else {
         alert("Please load a PDF first.");
     }
+});
+
+
+// Manual Validation Controls
+const prevPageBtn = document.getElementById("prev-page");
+const nextPageBtn = document.getElementById("next-page");
+const previewPageNum = document.getElementById("preview-page-num");
+const totalPagesSpan = document.getElementById("total-pages");
+
+prevPageBtn.addEventListener("click", () => {
+    console.log("Prev Clicked. Current:", currentlyRenderedPage);
+    if (currentlyRenderedPage <= 1) return;
+    renderPage(currentlyRenderedPage - 1);
+});
+
+nextPageBtn.addEventListener("click", () => {
+    console.log("Next Clicked. Current:", currentlyRenderedPage, "Total:", pdfDoc ? pdfDoc.numPages : "null");
+    if (!pdfDoc || currentlyRenderedPage >= pdfDoc.numPages) return;
+    renderPage(currentlyRenderedPage + 1);
 });
 
 
@@ -207,7 +239,7 @@ function updatePageIndicator(pageNum) {
 
 function formatWord(word) {
     // Check if the feature is enabled
-    if (!focusToggle.checked) return word;
+    if (!focusToggle.checked || word.length === 0) return word;
     
     // Only format if word is substantial enough? User asked for center letter.
     // If length is 1, index 0. If 2, index 0 (floor) or 1? Math.floor((2-1)/2) = 0.
@@ -222,6 +254,43 @@ function formatWord(word) {
     return `${pre}<span class="focus-letter">${center}</span>${post}`;
 }
 
+// Function to render PDF page
+async function renderPage(num) {
+    if (!pdfDoc || num === currentlyRenderedPage) return;
+    
+    // Validate page exists
+    if (num < 1 || num > pdfDoc.numPages) return;
+
+    try {
+        currentlyRenderedPage = num;
+        const page = await pdfDoc.getPage(num);
+        
+        // Scale to fit canvas width
+        const desiredWidth = canvas.clientWidth || 600; // Fallback or current logical width
+        const viewport = page.getViewport({ scale: 1.0 });
+        const scale = desiredWidth / viewport.width;
+        const scaledViewport = page.getViewport({ scale: scale });
+
+        canvas.height = scaledViewport.height;
+        canvas.width = scaledViewport.width;
+
+        const renderContext = {
+            canvasContext: ctx,
+            viewport: scaledViewport
+        };
+        await page.render(renderContext).promise;
+        
+        previewContainer.style.display = "block";
+        
+        // Update Page Count Display
+        previewPageNum.textContent = num;
+        totalPagesSpan.textContent = pdfDoc.numPages;
+
+    } catch (err) {
+        console.error("Error rendering page:", err);
+    }
+}
+
 function startReadingLoop() {
   if (words.length === 0) return;
 
@@ -233,7 +302,9 @@ function startReadingLoop() {
   
   // Show initial page
   if (currentWordIndex < wordPageMapping.length) {
-      updatePageIndicator(wordPageMapping[currentWordIndex]);
+      const pageNum = wordPageMapping[currentWordIndex];
+      updatePageIndicator(pageNum);
+      renderPage(pageNum); // Render initial page
   }
 
   timer = setInterval(() => {
@@ -244,6 +315,11 @@ function startReadingLoop() {
       // Update page number
       const pageNum = wordPageMapping[currentWordIndex];
       if (pageNum) updatePageIndicator(pageNum);
+      
+      // Sync Preview: Render new page if changed
+      if (pageNum && pageNum !== currentlyRenderedPage) {
+          renderPage(pageNum);
+      }
       
       currentWordIndex++;
     } else {
@@ -277,11 +353,13 @@ async function readPDF(file) {
   words = [];
   wordPageMapping = [];
   outputText = "";
+  pdfDoc = null; // Clear global PDF
+  currentlyRenderedPage = 0;
 
   try {
     const arrayBuffer = await file.arrayBuffer();
-    const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
-    const totalPages = pdf.numPages;
+    pdfDoc = await pdfjsLib.getDocument({ data: arrayBuffer }).promise; // Store globally
+    const totalPages = pdfDoc.numPages;
 
     let startPage = parseInt(startPageInput.value) || 1;
     let endPage = parseInt(endPageInput.value) || totalPages;
@@ -298,7 +376,7 @@ async function readPDF(file) {
     endPageInput.value = endPage;
 
     for (let i = startPage; i <= endPage; i++) {
-        const page = await pdf.getPage(i);
+        const page = await pdfDoc.getPage(i);
         const textContent = await page.getTextContent();
         const pageText = textContent.items.map((s) => s.str).join(" ");
         
@@ -308,8 +386,9 @@ async function readPDF(file) {
         if (pageWords.length > 0) {
             words.push(...pageWords);
             // push page number for every word in this page
+            const actualPageNum = i; 
             for(let k=0; k < pageWords.length; k++){
-                wordPageMapping.push(i);
+                wordPageMapping.push(actualPageNum);
             }
         }
         
@@ -323,6 +402,10 @@ async function readPDF(file) {
     resetReaderState();
     updateButtonVisibility("stopped");
     updatePageIndicator("-"); // reset indicator
+    
+    // Simply show the container, but don't render until Start or if range is explicit
+    previewContainer.style.display = "block";
+    renderPage(startPage); 
 
   } catch (error) {
     console.error(error);

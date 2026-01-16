@@ -194,3 +194,50 @@ button:hover {
     }
 
 }
+
+/* PDF Preview - Phase 5 */
+#preview-container {
+    margin-top: 30px;
+    width: 100%;
+    max-width: 600px;
+    text-align: center;
+    display: none; /* Hidden until PDF loads */
+}
+
+#preview-container label {
+    display: block;
+    font-weight: bold;
+    margin-bottom: 10px;
+    color: var(--text-color);
+}
+
+#pdf-render {
+    width: 100%;
+    border: 1px solid #ccc;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    border-radius: 5px;
+}
+
+.pdf-controls {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 15px;
+    margin-top: 10px;
+}
+
+#page-count-display {
+    font-weight: bold;
+    color: var(--text-color);
+}
+
+#prev-page, #next-page {
+    background-color: #6c757d;
+    color: white;
+    padding: 5px 15px;
+    font-size: 0.9rem;
+}
+
+#prev-page:hover, #next-page:hover {
+    background-color: #5a6268;
+}
